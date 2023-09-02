@@ -20,6 +20,19 @@ const {createServer} = require("http");
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
+const EventEmitter = require("events");
+const eventEmitter = new EventEmitter();
+
+eventEmitter.on("insert", (e) => {
+  io.emit("message", "inserted new item in bucket");
+});
+eventEmitter.on("update", (e) => {
+  io.emit("message", "updated item in bucket");
+});
+eventEmitter.on("delete", (e) => {
+  io.emit("message", "deleted item in bucket");
+});
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -46,10 +59,19 @@ app.use(parser.urlencoded({extended: true}));
 
 app.use("/", authenticationRoute);
 app.use("/api/users", validateToken, userRoutes);
-app.use("/api/buckets", validateToken, bucketRoutes);
+
+app.use(
+  "/api/buckets",
+  (req, res, next) => {
+    req.e = eventEmitter;
+    next();
+  },
+  validateToken,
+  bucketRoutes
+);
 
 httpServer.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-module.exports = io;
+module.exports = eventEmitter;
