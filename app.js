@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
@@ -14,6 +15,22 @@ const authenticationRoute = require("./routes/authentication.route");
 const app = express();
 const port = process.env.PORT;
 
+const {Server} = require("socket.io");
+const {createServer} = require("http");
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+io.on("connection", (socket) => {
+  socket.on("message", (data) => {
+    console.log(`Received message from ${socket.id}\n${data}`);
+    io.emit("message", `${socket.id} sends message: ${data}`);
+  });
+});
+
 app.use(
   cors({
     credentials: true,
@@ -27,10 +44,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(parser.urlencoded({extended: true}));
 
-app.use("/", authenticationRoute); // Authentication route
-app.use("/api/users", validateToken, userRoutes); // User routes
-app.use("/api/buckets", validateToken, bucketRoutes); // on working
+app.use("/", authenticationRoute);
+app.use("/api/users", validateToken, userRoutes);
+app.use("/api/buckets", validateToken, bucketRoutes);
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+module.exports = io;

@@ -1,5 +1,16 @@
 const pool = require("./db.model");
 
+// const io = require("../app");
+
+// io.on("connection", (socket) => {
+//   socket.on("message", (data) => {
+//     console.log(`Received message from ${socket.id}\n${data}`);
+//     io.emit("message", `${socket.id} sends message: ${data}`);
+//   });
+// });
+
+// io.emit("message", `hello `);
+
 const bucketModel = {
   createBucket: (bucket) => {
     return new Promise((resolve, reject) => {

@@ -1,4 +1,5 @@
 const bucketModel = require("../models/buckets.model");
+
 const bucketsController = {
   addBucket: async (req, res) => {
     const userId = req.user.id;
