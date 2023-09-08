@@ -33,6 +33,7 @@ eventEmitter.on("delete", (e) => {
   io.emit("message", "deleted item in bucket");
 });
 
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
